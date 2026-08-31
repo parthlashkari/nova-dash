@@ -118,7 +118,7 @@ export default function App() {
           <button className="icon-btn" onClick={() => setSidebarOpen(o => !o)} aria-label="Toggle sidebar">☰</button>
 
           <div className="search-box">
-            <span className="search-icon">ðŸ”</span>
+            <span className="search-icon">🔍</span>
             <input
               className="search-input"
               placeholder={meta.placeholder}
