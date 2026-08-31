@@ -28,6 +28,27 @@ export default function App() {
     [search]
   );
 
+  function exportCSV() {
+    const headers = ['Customer', 'Email', 'Amount', 'Status', 'Method', 'Date'];
+    const rows = filtered.map(t => [t.user, t.email, `$${t.amount}`, t.status, t.method, t.date]);
+    const csv = [headers, ...rows].map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'transactions.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  const PAGE_LABELS: Record<string, string> = {
+    dashboard: 'Dashboard',
+    analytics: 'Analytics',
+    users: 'Users',
+    orders: 'Orders',
+    settings: 'Settings',
+  };
+
   return (
     <div className={`app ${theme}`}>
       {/* ── Sidebar ── */}
@@ -101,12 +122,23 @@ export default function App() {
         <main className="page">
           <div className="page-header">
             <div>
-              <h1 className="page-title">Dashboard</h1>
-              <p className="page-subtitle">Welcome back, Parth. Here's what's happening today.</p>
+              <h1 className="page-title">{PAGE_LABELS[page]}</h1>
+              <p className="page-subtitle">
+                {page === 'dashboard' ? "Welcome back, Parth. Here's what's happening today." : `Viewing ${PAGE_LABELS[page]}`}
+              </p>
             </div>
-            <button className="export-btn">⬇ Export Report</button>
+            {page === 'dashboard' && (
+              <button className="export-btn" onClick={exportCSV}>⬇ Export Report</button>
+            )}
           </div>
 
+          {page !== 'dashboard' ? (
+            <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'50vh', gap:'1rem', color:'var(--text2)' }}>
+              <div style={{ fontSize:'4rem' }}>{NAV.find(n => n.id === page)?.icon}</div>
+              <h2 style={{ fontSize:'1.5rem', color:'var(--text1)', margin:0 }}>{PAGE_LABELS[page]}</h2>
+              <p style={{ margin:0, fontSize:'.95rem' }}>This section is a UI demo — content coming soon.</p>
+            </div>
+          ) : (<>
           {/* KPI Stats */}
           <div className="stats-grid">
             {stats.map(s => <StatsCard key={s.id} stat={s} />)}
@@ -146,6 +178,7 @@ export default function App() {
             </div>
             <DataTable data={filtered} />
           </div>
+          </>)}
         </main>
       </div>
     </div>

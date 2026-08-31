@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Transaction } from '../types';
 
 const PER_PAGE = 6;
@@ -10,6 +10,9 @@ interface Props { data: Transaction[] }
 export default function DataTable({ data }: Props) {
   const [sort, setSort] = useState<{ col: SortCol; dir: 'asc' | 'desc' }>({ col: 'date', dir: 'desc' });
   const [page, setPage] = useState(0);
+
+  // reset to first page whenever search filter changes the data
+  useEffect(() => { setPage(0); }, [data]);
 
   const sorted = [...data].sort((a, b) => {
     const va = a[sort.col]; const vb = b[sort.col];
