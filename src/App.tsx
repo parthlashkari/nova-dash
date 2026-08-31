@@ -12,11 +12,11 @@ import { revenueData, salesData } from './data';
 import type { Theme } from './types';
 
 const NAV = [
-  { id: 'dashboard', icon: 'âŠž', label: 'Dashboard' },
-  { id: 'analytics', icon: 'â—Ž', label: 'Analytics' },
-  { id: 'users', icon: 'â—‰', label: 'Users' },
-  { id: 'orders', icon: 'â¬¡', label: 'Orders' },
-  { id: 'settings', icon: 'âš™', label: 'Settings' },
+  { id: 'dashboard', icon: '⊞', label: 'Dashboard' },
+  { id: 'analytics', icon: '◎', label: 'Analytics' },
+  { id: 'users', icon: '◉', label: 'Users' },
+  { id: 'orders', icon: '⬡', label: 'Orders' },
+  { id: 'settings', icon: '⚙', label: 'Settings' },
 ] as const;
 
 const PAGE_META: Record<string, { title: string; sub: string; placeholder: string }> = {
@@ -75,10 +75,10 @@ export default function App() {
 
   return (
     <div className={`app ${theme}`}>
-      {/* â”€â”€ Sidebar â”€â”€ */}
+      {/* ── Sidebar ── */}
       <aside className={`sidebar ${sidebarOpen ? '' : 'collapsed'}`}>
         <div className="sidebar-brand">
-          <span className="brand-icon">â¬¡</span>
+          <span className="brand-icon">⬡</span>
           {sidebarOpen && <span className="brand-name">NovaDash</span>}
         </div>
 
@@ -111,11 +111,11 @@ export default function App() {
         </div>
       </aside>
 
-      {/* â”€â”€ Content area â”€â”€ */}
+      {/* ── Content area ── */}
       <div className="content-wrap">
         {/* Topbar */}
         <header className="topbar">
-          <button className="icon-btn" onClick={() => setSidebarOpen(o => !o)} aria-label="Toggle sidebar">â˜°</button>
+          <button className="icon-btn" onClick={() => setSidebarOpen(o => !o)} aria-label="Toggle sidebar">☰</button>
 
           <div className="search-box">
             <span className="search-icon">ðŸ”</span>
@@ -130,9 +130,9 @@ export default function App() {
 
           <div className="topbar-right">
             <button className="icon-btn" onClick={() => setTheme(t => t === 'light' ? 'dark' : 'light')} aria-label="Toggle theme">
-              {theme === 'light' ? 'ðŸŒ™' : 'â˜€ï¸'}
+              {theme === 'light' ? '🌙' : '☀️'}
             </button>
-            <button className="icon-btn" aria-label="Notifications">ðŸ””</button>
+            <button className="icon-btn" aria-label="Notifications">🔔</button>
             <div className="avatar">PL</div>
           </div>
         </header>
@@ -145,7 +145,7 @@ export default function App() {
               <p className="page-subtitle">{meta.sub}</p>
             </div>
             {page === 'dashboard' && (
-              <button className="export-btn" onClick={exportCSV}>â¬‡ Export Report</button>
+              <button className="export-btn" onClick={exportCSV}>⬇ Export Report</button>
             )}
           </div>
 
@@ -157,14 +157,14 @@ export default function App() {
               <div className="card">
                 <div className="card-header">
                   <div><h3 className="card-title">Revenue Trend</h3><p className="card-sub">Last 6 months</p></div>
-                  <span className="card-badge up">â†‘ 18.4%</span>
+                  <span className="card-badge up">↑ 18.4%</span>
                 </div>
                 <LineChart data={revenueData} color="#6366f1" />
               </div>
               <div className="card">
                 <div className="card-header">
                   <div><h3 className="card-title">Daily Orders</h3><p className="card-sub">This week</p></div>
-                  <span className="card-badge up">â†‘ 7.2%</span>
+                  <span className="card-badge up">↑ 7.2%</span>
                 </div>
                 <BarChart data={salesData} color="#10b981" />
               </div>
