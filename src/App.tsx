@@ -1,18 +1,31 @@
-import { useState, useMemo } from 'react';
-import { stats, revenueData, salesData, transactions } from './data';
+﻿import { useState, useMemo, useEffect } from 'react';
+import { stats, transactions, users, orders } from './data';
 import StatsCard from './components/StatsCard';
 import LineChart from './components/LineChart';
 import BarChart from './components/BarChart';
 import DataTable from './components/DataTable';
+import AnalyticsPage from './pages/AnalyticsPage';
+import UsersPage from './pages/UsersPage';
+import OrdersPage from './pages/OrdersPage';
+import SettingsPage from './pages/SettingsPage';
+import { revenueData, salesData } from './data';
 import type { Theme } from './types';
 
 const NAV = [
-  { id: 'dashboard', icon: '⊞', label: 'Dashboard' },
-  { id: 'analytics', icon: '◎', label: 'Analytics' },
-  { id: 'users', icon: '◉', label: 'Users' },
-  { id: 'orders', icon: '⬡', label: 'Orders' },
-  { id: 'settings', icon: '⚙', label: 'Settings' },
+  { id: 'dashboard', icon: 'âŠž', label: 'Dashboard' },
+  { id: 'analytics', icon: 'â—Ž', label: 'Analytics' },
+  { id: 'users', icon: 'â—‰', label: 'Users' },
+  { id: 'orders', icon: 'â¬¡', label: 'Orders' },
+  { id: 'settings', icon: 'âš™', label: 'Settings' },
 ] as const;
+
+const PAGE_META: Record<string, { title: string; sub: string; placeholder: string }> = {
+  dashboard: { title: 'Dashboard', sub: "Welcome back, Parth. Here's what's happening today.", placeholder: 'Search transactions...' },
+  analytics: { title: 'Analytics', sub: 'Overview of traffic, conversions, and user behaviour.', placeholder: 'Search analytics...' },
+  users: { title: 'Users', sub: 'Manage team members and their access levels.', placeholder: 'Search by name or email...' },
+  orders: { title: 'Orders', sub: 'Track and manage all customer orders.', placeholder: 'Search by customer or product...' },
+  settings: { title: 'Settings', sub: 'Manage your account preferences and notifications.', placeholder: 'Search settings...' },
+};
 
 export default function App() {
   const [theme, setTheme] = useState<Theme>('dark');
@@ -20,7 +33,10 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [search, setSearch] = useState('');
 
-  const filtered = useMemo(
+  // clear search when switching pages
+  useEffect(() => { setSearch(''); }, [page]);
+
+  const filteredTransactions = useMemo(
     () => transactions.filter(t =>
       t.user.toLowerCase().includes(search.toLowerCase()) ||
       t.email.toLowerCase().includes(search.toLowerCase())
@@ -28,33 +44,41 @@ export default function App() {
     [search]
   );
 
+  const filteredUsers = useMemo(
+    () => users.filter(u =>
+      u.name.toLowerCase().includes(search.toLowerCase()) ||
+      u.email.toLowerCase().includes(search.toLowerCase())
+    ),
+    [search]
+  );
+
+  const filteredOrders = useMemo(
+    () => orders.filter(o =>
+      o.customer.toLowerCase().includes(search.toLowerCase()) ||
+      o.product.toLowerCase().includes(search.toLowerCase())
+    ),
+    [search]
+  );
+
   function exportCSV() {
     const headers = ['Customer', 'Email', 'Amount', 'Status', 'Method', 'Date'];
-    const rows = filtered.map(t => [t.user, t.email, `$${t.amount}`, t.status, t.method, t.date]);
+    const rows = filteredTransactions.map(t => [t.user, t.email, `$${t.amount}`, t.status, t.method, t.date]);
     const csv = [headers, ...rows].map(r => r.map(v => `"${v}"`).join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = 'transactions.csv';
-    a.click();
+    a.href = url; a.download = 'transactions.csv'; a.click();
     URL.revokeObjectURL(url);
   }
 
-  const PAGE_LABELS: Record<string, string> = {
-    dashboard: 'Dashboard',
-    analytics: 'Analytics',
-    users: 'Users',
-    orders: 'Orders',
-    settings: 'Settings',
-  };
+  const meta = PAGE_META[page];
 
   return (
     <div className={`app ${theme}`}>
-      {/* ── Sidebar ── */}
+      {/* â”€â”€ Sidebar â”€â”€ */}
       <aside className={`sidebar ${sidebarOpen ? '' : 'collapsed'}`}>
         <div className="sidebar-brand">
-          <span className="brand-icon">⬡</span>
+          <span className="brand-icon">â¬¡</span>
           {sidebarOpen && <span className="brand-name">NovaDash</span>}
         </div>
 
@@ -87,33 +111,28 @@ export default function App() {
         </div>
       </aside>
 
-      {/* ── Content area ── */}
+      {/* â”€â”€ Content area â”€â”€ */}
       <div className="content-wrap">
         {/* Topbar */}
         <header className="topbar">
-          <button className="icon-btn" onClick={() => setSidebarOpen(o => !o)} aria-label="Toggle sidebar">
-            ☰
-          </button>
+          <button className="icon-btn" onClick={() => setSidebarOpen(o => !o)} aria-label="Toggle sidebar">â˜°</button>
 
           <div className="search-box">
-            <span className="search-icon">🔍</span>
+            <span className="search-icon">ðŸ”</span>
             <input
               className="search-input"
-              placeholder="Search users, orders..."
+              placeholder={meta.placeholder}
               value={search}
               onChange={e => setSearch(e.target.value)}
+              disabled={page === 'analytics' || page === 'settings'}
             />
           </div>
 
           <div className="topbar-right">
-            <button
-              className="icon-btn"
-              onClick={() => setTheme(t => t === 'light' ? 'dark' : 'light')}
-              aria-label="Toggle theme"
-            >
-              {theme === 'light' ? '🌙' : '☀️'}
+            <button className="icon-btn" onClick={() => setTheme(t => t === 'light' ? 'dark' : 'light')} aria-label="Toggle theme">
+              {theme === 'light' ? 'ðŸŒ™' : 'â˜€ï¸'}
             </button>
-            <button className="icon-btn" aria-label="Notifications">🔔</button>
+            <button className="icon-btn" aria-label="Notifications">ðŸ””</button>
             <div className="avatar">PL</div>
           </div>
         </header>
@@ -122,63 +141,49 @@ export default function App() {
         <main className="page">
           <div className="page-header">
             <div>
-              <h1 className="page-title">{PAGE_LABELS[page]}</h1>
-              <p className="page-subtitle">
-                {page === 'dashboard' ? "Welcome back, Parth. Here's what's happening today." : `Viewing ${PAGE_LABELS[page]}`}
-              </p>
+              <h1 className="page-title">{meta.title}</h1>
+              <p className="page-subtitle">{meta.sub}</p>
             </div>
             {page === 'dashboard' && (
-              <button className="export-btn" onClick={exportCSV}>⬇ Export Report</button>
+              <button className="export-btn" onClick={exportCSV}>â¬‡ Export Report</button>
             )}
           </div>
 
-          {page !== 'dashboard' ? (
-            <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'50vh', gap:'1rem', color:'var(--text2)' }}>
-              <div style={{ fontSize:'4rem' }}>{NAV.find(n => n.id === page)?.icon}</div>
-              <h2 style={{ fontSize:'1.5rem', color:'var(--text1)', margin:0 }}>{PAGE_LABELS[page]}</h2>
-              <p style={{ margin:0, fontSize:'.95rem' }}>This section is a UI demo — content coming soon.</p>
+          {page === 'dashboard' && (<>
+            <div className="stats-grid">
+              {stats.map(s => <StatsCard key={s.id} stat={s} />)}
             </div>
-          ) : (<>
-          {/* KPI Stats */}
-          <div className="stats-grid">
-            {stats.map(s => <StatsCard key={s.id} stat={s} />)}
-          </div>
-
-          {/* Charts */}
-          <div className="charts-grid">
-            <div className="card">
-              <div className="card-header">
-                <div>
-                  <h3 className="card-title">Revenue Trend</h3>
-                  <p className="card-sub">Last 6 months</p>
+            <div className="charts-grid">
+              <div className="card">
+                <div className="card-header">
+                  <div><h3 className="card-title">Revenue Trend</h3><p className="card-sub">Last 6 months</p></div>
+                  <span className="card-badge up">â†‘ 18.4%</span>
                 </div>
-                <span className="card-badge up">↑ 18.4%</span>
+                <LineChart data={revenueData} color="#6366f1" />
               </div>
-              <LineChart data={revenueData} color="#6366f1" />
+              <div className="card">
+                <div className="card-header">
+                  <div><h3 className="card-title">Daily Orders</h3><p className="card-sub">This week</p></div>
+                  <span className="card-badge up">â†‘ 7.2%</span>
+                </div>
+                <BarChart data={salesData} color="#10b981" />
+              </div>
             </div>
             <div className="card">
               <div className="card-header">
                 <div>
-                  <h3 className="card-title">Daily Orders</h3>
-                  <p className="card-sub">This week</p>
+                  <h3 className="card-title">Recent Transactions</h3>
+                  <p className="card-sub">{filteredTransactions.length} entries</p>
                 </div>
-                <span className="card-badge up">↑ 7.2%</span>
               </div>
-              <BarChart data={salesData} color="#10b981" />
+              <DataTable data={filteredTransactions} />
             </div>
-          </div>
-
-          {/* Transactions table */}
-          <div className="card">
-            <div className="card-header">
-              <div>
-                <h3 className="card-title">Recent Transactions</h3>
-                <p className="card-sub">{filtered.length} entries</p>
-              </div>
-            </div>
-            <DataTable data={filtered} />
-          </div>
           </>)}
+
+          {page === 'analytics' && <AnalyticsPage />}
+          {page === 'users' && <UsersPage users={filteredUsers} />}
+          {page === 'orders' && <OrdersPage orders={filteredOrders} />}
+          {page === 'settings' && <SettingsPage theme={theme} setTheme={setTheme} />}
         </main>
       </div>
     </div>
